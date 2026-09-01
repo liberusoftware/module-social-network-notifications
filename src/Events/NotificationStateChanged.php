@@ -9,7 +9,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Liberu\SocialNetwork\Notifications\Models\SocialNotification;
 
-final readonly class NotificationCreated implements ShouldBroadcast, ShouldDispatchAfterCommit
+final readonly class NotificationStateChanged implements ShouldBroadcast, ShouldDispatchAfterCommit
 {
     public function __construct(public SocialNotification $notification) {}
 
@@ -20,17 +20,15 @@ final readonly class NotificationCreated implements ShouldBroadcast, ShouldDispa
 
     public function broadcastAs(): string
     {
-        return 'notification.created';
+        return 'notification.state-changed';
     }
 
     public function broadcastWith(): array
     {
         return ['notification' => [
             'id' => $this->notification->getKey(),
-            'kind' => $this->notification->kind,
             'state' => $this->notification->state,
-            'channel' => $this->notification->channel,
-            'payload' => $this->notification->payload,
+            'read_at' => $this->notification->read_at?->toISOString(),
         ]];
     }
 }
