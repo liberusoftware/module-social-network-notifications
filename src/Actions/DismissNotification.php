@@ -10,7 +10,7 @@ use Liberu\SocialNetwork\Notifications\Events\NotificationStateChanged;
 use Liberu\SocialNetwork\Notifications\Models\SocialNotification;
 use Liberu\SocialNetwork\Profiles\Models\Profile;
 
-final readonly class MarkRead
+final readonly class DismissNotification
 {
     public function __construct(private NotificationAuthorizer $authorizer, private Dispatcher $events) {}
 
@@ -18,8 +18,7 @@ final readonly class MarkRead
     {
         $this->authorizer->view($profile);
         $notification = SocialNotification::query()->where('profile_id', $profile->getKey())->findOrFail($id);
-        $notification->update(['state' => 'read', 'read_at' => now()]);
-
+        $notification->forceFill(['state' => 'dismissed'])->save();
         $notification = $notification->refresh();
         $this->events->dispatch(new NotificationStateChanged($notification));
 
